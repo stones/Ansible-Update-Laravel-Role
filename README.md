@@ -8,8 +8,8 @@ This is a role that I use to update my Laravel 5 applications. It could be made 
 At the moment, this role suits my needs as they stand so:
 
 - MySQL
-- Gulp
-- Bower
+- [Gulp](http://gulpjs.com/)
+- [Bower](http://bower.io/)
 
 This is not to say that it couldn't be adapted, so it should be easy enough to swap `Gulp` for `Grunt` and `Mysq` for `Postgres` if requested
 
