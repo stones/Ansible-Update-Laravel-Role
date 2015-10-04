@@ -1,0 +1,68 @@
+---
+# Update a Laravel Website
+
+- name: Update Composer
+  command: composer self-update
+
+- name: Bring site down
+  command: php artisan down chdir="{{ site_current_folder }}"
+
+- name: Create back up MYSQL dump
+  mysql_db: name=rednote_portal state=dump target="/tmp/{{ db_dump_file }}" login_host={{ db_host }} login_port={{ db_port }}
+  sudo: yes
+
+- name: Download backup dump
+  fetch: src="/tmp/{{ db_dump_file }}" dest=./ flat=yes
+
+- name: Remove the sql file from the serve
+  file: path="/tmp/{{ db_dump_file }}" state=absent
+
+- name: Copy current folder to archive
+  command: cp -R {{ site_current_folder }} {{ site_archive_folder }}
+
+- name: Update from git
+  git: repo={{ site_repository }} dest={{ site_current_folder }} force=yes
+  sudo: yes
+  sudo_user: "{{ web_user }}"
+
+- name: Update folder permissions
+  file: path="{{ item }}" owner="{{ web_user }}" group="{{ web_group }}" mode=0777
+  with_items:
+    - "{{ site_current_folder }}/storage"
+    - "{{ site_current_folder }}/bootstrap"
+    - "{{ site_current_folder }}/bootstrap/cache"
+
+- name: Add the environment file
+  template: src=env.j2 dest="{{ site_current_folder }}/.env" owner={{ web_user }} group={{ web_user }} mode=0644
+
+- name: Update Composer dependencies
+  command: composer install --no-dev --optimize-autoloader chdir={{ site_current_folder }}
+  sudo: yes
+  sudo_user: "{{ web_user }}"
+
+- name: Update Node packages
+  command: npm update chdir={{ site_current_folder }}
+  sudo: yes
+  sudo_user: "{{ web_user }}"
+
+- name: Update Bower components
+  command: bower install --allow-root chdir={{ site_current_folder }}
+  sudo: yes
+  sudo_user: "{{ web_user }}"
+
+- name: Build static
+  command: gulp chdir={{ site_current_folder }}
+  sudo: yes
+  sudo_user: "{{ web_user }}"
+
+- name: Optimize Laravel application
+  command: php artisan optimize chdir={{ site_current_folder }}
+
+- name: Clear caches
+  command: php artisan cache:clear chdir={{ site_current_folder }}
+
+- name: Migrate database
+  command: php artisan migrate --force chdir={{ site_current_folder }}
+
+- name: Bring site back up
+  command: php artisan up chdir={{ site_current_folder }}

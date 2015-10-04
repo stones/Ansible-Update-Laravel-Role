@@ -1,0 +1,27 @@
+---
+db_host: localhost
+db_port: 3306
+db_name: database_name
+db_user: database_user
+db_password: database_password
+db_dump_file: name_of_database_dump_file
+
+web_user: root
+web_group: root
+
+site_current_folder: /location/of/application/directory
+site_archive_folder: /location/of/archive/directory
+site_repository: 'git@github.com:stones/Ansible-Update-Laravel-Role.git'
+
+env: |
+  THIS=Things_in_your_env_file
+  DB_HOST={{ db_host  }}
+  DB_PORT= {{ db_port }}
+  DB_DATABASE={{ db_name }}
+  DB_USERNAME={{ db_user }}
+  DB_PASSWORD={{ db_password }}
+
+  CACHE_DRIVER=file
+  SESSION_DRIVER=file
+
+  CIPHER=AES-256-CBC
